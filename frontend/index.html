@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vollyx - World Volleyball Team Rankings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════ THEMES */
+
+/* WOMEN – light cream */
+:root {
+  --bg:        #FFF9E8;
+  --bg2:       #FDEBD0;
+  --bg3:       #F9D4A6;
+  --border:    rgba(0,0,0,0.10);
+  --accent:    #F0827A;
+  --accent-d:  rgba(240,130,122,0.15);
+  --gold:      oklch(50% 0.17 70);
+  --gold-dim:  oklch(50% 0.17 70 / 0.2);
+  --green:     oklch(38% 0.19 155);
+  --red:       oklch(40% 0.22 22);
+  --text:      #2A1208;
+  --muted:     rgba(42,18,8,0.42);
+  --row-hover: rgba(0,0,0,0.04);
+  --row-top3:  rgba(0,0,0,0.03);
+  --shadow:    0 2px 16px rgba(0,0,0,0.07);
+  --toggle-bg: rgba(42,18,8,0.10);
+  --noise-op:  0.3;
+}
+
+/* MEN – dark charcoal/brown */
+body.men {
+  --bg:        #080604;
+  --bg2:       #1E0B07;
+  --bg3:       #2A1008;
+  --border:    rgba(255,255,255,0.07);
+  --accent:    #E04E28;
+  --accent-d:  rgba(224,78,40,0.15);
+  --gold:      oklch(70% 0.17 82);
+  --gold-dim:  oklch(70% 0.17 82 / 0.12);
+  --green:     oklch(62% 0.18 155);
+  --red:       oklch(58% 0.20 22);
+  --text:      #F0E4D8;
+  --muted:     rgba(240,228,216,0.38);
+  --row-hover: rgba(255,255,255,0.025);
+  --row-top3:  rgba(255,255,255,0.018);
+  --shadow:    0 2px 24px rgba(0,0,0,0.4);
+  --toggle-bg: #2A1008;
+  --noise-op:  0.6;
+}
+
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.5s ease, color 0.4s ease;
+}
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: var(--noise-op);
+  transition: opacity 0.5s;
+}
+
+.page { position:relative; z-index:1; max-width:1100px; margin:0 auto; padding:0 1.5rem 5rem; }
+
+/* ═══════════════════════════════════════════════════ FLIP ANIMATION */
+@keyframes flipExitRight {
+  0%   { opacity:1; transform: perspective(900px) translateX(0px)   rotateY(0deg); }
+  100% { opacity:0; transform: perspective(900px) translateX(70px)  rotateY(65deg); }
+}
+@keyframes flipExitLeft {
+  0%   { opacity:1; transform: perspective(900px) translateX(0px)   rotateY(0deg); }
+  100% { opacity:0; transform: perspective(900px) translateX(-70px) rotateY(-65deg); }
+}
+@keyframes flipEnterFromLeft {
+  0%   { opacity:0; transform: perspective(900px) translateX(-70px) rotateY(65deg); }
+  100% { opacity:1; transform: perspective(900px) translateX(0px)   rotateY(0deg); }
+}
+@keyframes flipEnterFromRight {
+  0%   { opacity:0; transform: perspective(900px) translateX(70px)  rotateY(-65deg); }
+  100% { opacity:1; transform: perspective(900px) translateX(0px)   rotateY(0deg); }
+}
+
+/* ═══════════════════════════════════════════════════ HEADER */
+.site-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-rows: auto;
+  grid-template-areas: "logo toggle nav";
+  align-items: stretch;
+  padding: 1.4rem 0 1rem;
+  border-bottom: 1px solid var(--border);
+  transition: border-color 0.4s;
+}
+body.men .site-header {
+  grid-template-areas: "nav toggle logo";
+}
+.header-logo   { grid-area: logo;   display: flex; align-items: center; justify-content: flex-start; }
+.header-toggle { grid-area: toggle; display: flex; align-items: center; justify-content: center; }
+.header-nav    { grid-area: nav;    display: flex; align-items: center; justify-content: flex-end; }
+body.men .header-logo { justify-content: flex-end; }
+body.men .header-nav  { justify-content: flex-start; }
+
+.logo { display:flex; align-items:center; gap:0.7rem; }
+.logo-badge {
+  width:36px; height:36px; border-radius:8px;
+  background: var(--accent);
+  display:grid; place-items:center;
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900; font-size:0.78rem; letter-spacing:0.05em; color:#fff;
+  transition: background 0.5s;
+}
+.logo-name {
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:800; font-size:1.15rem; letter-spacing:0.12em;
+  text-transform:uppercase;
+}
+.logo-name span { color: var(--accent); transition: color 0.5s; }
+
+.nav-links { display:flex; gap:2rem; }
+.nav-links a {
+  font-size:0.78rem; font-weight:500; letter-spacing:0.1em;
+  text-transform:uppercase; color: var(--muted); text-decoration:none;
+  transition: color 0.2s; cursor:pointer;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a.active { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════ GENDER TOGGLE */
+.gender-toggle {
+  display:flex; align-items:center; position:relative;
+  background: var(--toggle-bg);
+  border: 1px solid var(--border);
+  border-radius:100px; padding:3px; cursor:pointer;
+  user-select:none;
+  transition: background 0.4s, border-color 0.4s;
+}
+.gender-toggle:hover { border-color: var(--accent); }
+.gt-knob {
+  position:absolute; top:3px; bottom:3px;
+  width:calc(50% - 3px); border-radius:100px;
+  background: var(--accent);
+  transition: left 0.42s cubic-bezier(0.65,0,0.35,1), background 0.5s;
+  left:3px; pointer-events:none;
+}
+body.men .gt-knob { left:calc(50%); }
+.gt-label {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.75rem; font-weight:700; letter-spacing:0.14em;
+  text-transform:uppercase; padding:0.38rem 1.1rem;
+  color: var(--muted); position:relative; z-index:1;
+  transition: color 0.3s; pointer-events:none; white-space:nowrap;
+}
+.gt-label.active { color:#fff; }
+
+/* ═══════════════════════════════════════════════════ HERO */
+.hero {
+  padding:3.5rem 0 2.5rem;
+  display:flex; justify-content:space-between; align-items:flex-end; gap:1.5rem;
+  transition: flex-direction 0s;
+}
+body.men .hero { flex-direction:row-reverse; }
+
+.hero-left { flex:1; min-width:0; }
+body.men .hero-left { text-align:right; }
+body.men .hero-meta { justify-content:flex-end; }
+body.men .meta-value.live { justify-content:flex-end; }
+
+.gender-label {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.72rem; font-weight:700; letter-spacing:0.22em;
+  text-transform:uppercase; color:var(--accent);
+  height:1.05em; overflow:hidden; transition:color 0.5s;
+}
+.gender-label-inner {
+  display:flex; flex-direction:column;
+  transition: transform 0.45s cubic-bezier(0.65,0,0.35,1);
+}
+.gender-label-inner span { line-height:1; display:block; padding-bottom:0.15em; }
+body.men .gender-label-inner { transform:translateY(-50%); }
+
+.hero-title {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size: clamp(2.4rem,5vw,3.8rem);
+  font-weight:900; line-height:0.95;
+  text-transform:uppercase; letter-spacing:-0.01em;
+}
+.hero-title em { color:var(--accent); font-style:normal; transition:color 0.5s; }
+
+.hero-meta { margin-top:1rem; display:flex; gap:1.8rem; flex-wrap:wrap; }
+.meta-item { display:flex; flex-direction:column; gap:0.15rem; }
+.meta-label { font-size:0.65rem; font-weight:600; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); }
+.meta-value { font-size:0.88rem; font-weight:500; }
+.meta-value.live { color:var(--green); display:flex; align-items:center; gap:0.4rem; transition:color 0.4s; }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); animation:pulse 2s ease-in-out infinite; transition:background 0.4s; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+.meta-value.demo { color:var(--accent); transition:color 0.5s; }
+.demo-note { margin-top:1rem; display:inline-block; max-width:480px; padding:0.5rem 0.8rem; border-left:3px solid var(--accent); background:var(--accent-d); font-size:0.8rem; line-height:1.5; transition:border-color 0.5s, background 0.5s; }
+body.men .demo-note { border-left:none; border-right:3px solid var(--accent); }
+.hero-right { display:flex; flex-direction:column; gap:0.4rem; text-align:right; }
+body.men .hero-right { text-align:left; }
+.stat-pill {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.75rem; font-weight:600; letter-spacing:0.1em;
+  text-transform:uppercase; padding:0.3rem 0.9rem;
+  border:1px solid var(--border); border-radius:100px; color:var(--muted);
+  transition: border-color 0.4s;
+}
+
+/* ═══════════════════════════════════════════════════ CONTENT TABS */
+.content-tabs {
+  display:flex; border-bottom:1px solid var(--border);
+  transition: border-color 0.4s;
+}
+body.men .content-tabs { flex-direction:row-reverse; }
+.ctab {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.85rem; font-weight:700; letter-spacing:0.12em;
+  text-transform:uppercase; padding:0.75rem 1.6rem;
+  background:none; border:none; border-bottom:2px solid transparent;
+  color:var(--muted); cursor:pointer;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom:-1px;
+}
+.ctab:hover { color:var(--text); }
+.ctab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ═══════════════════════════════════════════════════ TOOLBAR */
+.toolbar {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:1rem; margin-bottom:0.75rem; flex-wrap:wrap; padding-top:1.2rem;
+}
+body.men .toolbar { flex-direction:row-reverse; }
+.search-wrap { position:relative; flex:1; min-width:180px; max-width:320px; }
+.search-wrap svg {
+  position:absolute; left:0.9rem; top:50%; transform:translateY(-50%);
+  color:var(--muted); pointer-events:none;
+}
+.search-input {
+  width:100%; background:var(--bg2); border:1px solid var(--border);
+  border-radius:8px; padding:0.6rem 0.9rem 0.6rem 2.4rem;
+  color:var(--text); font-family:'Barlow',sans-serif; font-size:0.85rem;
+  outline:none; transition: border-color 0.2s, background 0.4s, color 0.4s;
+}
+.search-input::placeholder { color:var(--muted); }
+.search-input:focus { border-color:var(--accent); }
+
+.filter-tabs { display:flex; gap:0.3rem; flex-wrap:wrap; }
+.ftab {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.75rem; font-weight:600; letter-spacing:0.1em;
+  text-transform:uppercase; padding:0.45rem 0.9rem;
+  background:none; border:1px solid var(--border); border-radius:6px;
+  color:var(--muted); cursor:pointer; transition:all 0.18s;
+}
+.ftab:hover { color:var(--text); border-color:var(--accent); }
+.ftab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* ═══════════════════════════════════════════════════ TABLE */
+.table-wrap {
+  border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  background:var(--bg2); box-shadow:var(--shadow);
+  transition: background 0.4s, border-color 0.4s, box-shadow 0.4s;
+}
+table { width:100%; border-collapse:collapse; }
+thead th {
+  padding:0.75rem 1rem;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.68rem; font-weight:600; letter-spacing:0.15em;
+  text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid var(--border);
+  text-align:left; cursor:pointer; user-select:none;
+  white-space:nowrap; background:var(--bg3);
+  transition: color 0.2s, background 0.4s, border-color 0.4s;
+}
+thead th:hover { color:var(--text); }
+thead th.sorted { color:var(--accent); }
+thead th .sa { margin-left:0.3em; opacity:0.5; font-size:0.6rem; }
+thead th.sorted .sa { opacity:1; }
+th.center, td.center { text-align:center; }
+th.right,  td.right  { text-align:right; }
+
+tbody tr {
+  border-bottom:1px solid var(--border);
+  transition: background 0.15s;
+}
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:var(--row-hover); }
+tbody tr.top3 { background:var(--row-top3); }
+td { padding:0.78rem 1rem; font-size:0.88rem; vertical-align:middle; }
+
+.rank-num {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:1.05rem; font-weight:700; color:var(--muted);
+  width:3.2rem; display:inline-block; text-align:center;
+}
+tr.top3 .rank-num { color:var(--text); }
+.rank-medal {
+  display:inline-grid; place-items:center;
+  width:28px; height:28px; border-radius:6px;
+  font-family:'Barlow Condensed',sans-serif; font-size:0.9rem; font-weight:800;
+}
+.medal-1 { background:var(--gold-dim); color:var(--gold); border:1px solid oklch(50% 0.17 70 / 0.35); }
+body.men .medal-1 { border-color:oklch(70% 0.17 82 / 0.3); }
+.medal-2 { background:rgba(100,130,160,0.12); color:#7098b8; border:1px solid rgba(100,130,160,0.25); }
+.medal-3 { background:rgba(160,100,70,0.12); color:#a06850; border:1px solid rgba(160,100,70,0.25); }
+
+.entity-cell { display:flex; align-items:center; gap:0.85rem; }
+.flag { font-size:1.35rem; line-height:1; flex-shrink:0; }
+.entity-name { font-weight:600; font-size:0.92rem; }
+.entity-sub { font-size:0.68rem; font-weight:500; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); margin-top:0.1rem; }
+
+.tier-badge {
+  display:inline-block; font-family:'Barlow Condensed',sans-serif;
+  font-size:0.65rem; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; padding:0.18rem 0.55rem;
+  border-radius:4px; white-space:nowrap;
+}
+.tier-1 { background:var(--gold-dim); color:var(--gold); border:1px solid oklch(50% 0.17 70 / 0.3); }
+body.men .tier-1 { border-color:oklch(70% 0.17 82 / 0.25); }
+.tier-2 { background:rgba(80,110,160,0.10); color:#6080a8; border:1px solid rgba(80,110,160,0.2); }
+.tier-3 { background:rgba(0,0,0,0.05); color:var(--muted); border:1px solid var(--border); }
+body.men .tier-3 { background:rgba(255,255,255,0.05); }
+
+.rating-val { font-family:'Barlow Condensed',sans-serif; font-size:1.05rem; font-weight:700; letter-spacing:0.02em; }
+tr.top3 .rating-val { color:var(--accent); }
+
+.change {
+  display:inline-flex; align-items:center; gap:0.25rem;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:0.82rem; font-weight:700;
+  padding:0.2rem 0.5rem; border-radius:5px; white-space:nowrap;
+}
+.change.up   { color:var(--green); background:oklch(38% 0.19 155 / 0.12); }
+.change.down { color:var(--red);   background:oklch(40% 0.22 22 / 0.12); }
+.change.same { color:var(--muted); background:var(--row-hover); }
+body.men .change.up   { background:oklch(62% 0.18 155 / 0.10); }
+body.men .change.down { background:oklch(58% 0.20 22 / 0.10); }
+
+.matches-bar-wrap { display:flex; align-items:center; gap:0.65rem; }
+.matches-bar { flex:1; max-width:70px; height:3px; background:var(--border); border-radius:99px; overflow:hidden; }
+.matches-bar-fill { height:100%; border-radius:99px; background:var(--accent); transition:background 0.5s; }
+
+.spark { display:flex; align-items:flex-end; gap:2px; height:20px; }
+.spark-bar { width:4px; border-radius:2px 2px 0 0; background:var(--accent); opacity:0.5; transition:opacity 0.15s, background 0.5s; }
+tr:hover .spark-bar { opacity:0.85; }
+
+.no-results { padding:3rem; text-align:center; color:var(--muted); font-size:0.9rem; }
+
+/* ═══════════════════════════════════════════════════ TAB PANELS */
+.ranking-section { display:none; }
+.ranking-section.visible { display:block; animation:tabIn 0.3s ease both; }
+@keyframes tabIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+/* ═══════════════════════════════════════════════════ METHODOLOGY */
+.methodology-page { display:none; padding:2.5rem 0; }
+.methodology-page.visible { display:block; animation:tabIn 0.3s ease both; }
+.meth-section { margin-bottom:2.5rem; }
+.meth-section h2 {
+  font-family:'Barlow Condensed',sans-serif; font-size:1.25rem; font-weight:800;
+  letter-spacing:0.08em; text-transform:uppercase;
+  margin-bottom:1rem; padding-bottom:0.5rem; border-bottom:1px solid var(--border);
+  transition: border-color 0.4s;
+}
+.meth-section h2 span { color:var(--accent); transition:color 0.5s; }
+.meth-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1rem; }
+.meth-card { background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:1.2rem 1.4rem; transition:background 0.4s, border-color 0.4s; }
+.meth-card-title { font-family:'Barlow Condensed',sans-serif; font-size:0.8rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--accent); margin-bottom:0.5rem; transition:color 0.5s; }
+.meth-card p { font-size:0.84rem; line-height:1.65; color:var(--muted); }
+.meth-formula { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:1rem 1.4rem; margin-top:1rem; font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:500; letter-spacing:0.05em; transition:background 0.4s, border-color 0.4s; }
+.meth-formula .var { color:var(--accent); transition:color 0.5s; }
+.meth-weights { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:0.6rem; margin-top:0.8rem; }
+.weight-item { background:var(--bg2); border:1px solid var(--border); border-radius:7px; padding:0.7rem 1rem; display:flex; justify-content:space-between; align-items:center; transition:background 0.4s, border-color 0.4s; }
+.weight-item .wlabel { font-size:0.8rem; color:var(--muted); }
+.weight-item .wval { font-family:'Barlow Condensed',sans-serif; font-size:1rem; font-weight:700; color:var(--gold); transition:color 0.4s; }
+
+/* ═══════════════════════════════════════════════════ FOOTER */
+.footer {
+  margin-top:2.5rem; padding-top:1.5rem; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.8rem;
+  transition: border-color 0.4s;
+}
+body.men .footer { flex-direction:row-reverse; }
+.footer-note { font-size:0.75rem; color:var(--muted); line-height:1.6; max-width:480px; }
+.footer-brand { font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); }
+.footer-brand span { color:var(--accent); transition:color 0.5s; }
+
+/* ═══════════════════════════════════════════════════ TWEAKS */
+#tweaks-panel {
+  display:none; position:fixed; bottom:1.5rem; right:1.5rem; z-index:100;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:12px; padding:1.2rem 1.4rem; width:220px;
+  box-shadow:var(--shadow);
+  transition:background 0.4s, border-color 0.4s;
+}
+#tweaks-panel.open { display:block; }
+.tweaks-title { font-family:'Barlow Condensed',sans-serif; font-size:0.7rem; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:1rem; }
+.tweak-row { margin-bottom:0.85rem; }
+.tweak-row label { display:block; font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); margin-bottom:0.35rem; }
+.tweak-row input[type=range] { width:100%; cursor:pointer; accent-color:var(--accent); }
+.tweak-toggle { display:flex; gap:0.4rem; }
+.tweak-btn { flex:1; padding:0.35rem; font-size:0.72rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; background:var(--bg3); border:1px solid var(--border); color:var(--muted); border-radius:5px; cursor:pointer; transition:all 0.15s; }
+.tweak-btn.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+
+@keyframes fadeInUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+tbody tr { animation:fadeInUp 0.3s ease both; }
+</style>
+
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="site-header">
+    <!-- Logo (fa = flips right when →men) -->
+    <div class="header-logo fa" style="grid-area:logo">
+      <div class="logo">
+        <div class="logo-badge">VX</div>
+        <span class="logo-name">VOLL<span>YX</span></span>
+      </div>
+    </div>
+
+    <!-- Toggle – always centered -->
+    <div class="header-toggle" style="grid-area:toggle">
+      <button class="gender-toggle" id="genderToggle" aria-label="Switch gender" style="margin: 0px">
+        <div class="gt-knob"></div>
+        <span class="gt-label active" id="gtW">Women</span>
+        <span class="gt-label" id="gtM">Men</span>
+      </button>
+    </div>
+
+    <!-- Nav (fb = flips left when →men) -->
+    <div class="header-nav fb" style="grid-area:nav">
+      <nav class="nav-links">
+        <a class="active" data-nav="rankings" style="margin: 0px">Rankings</a>
+        <a data-nav="methodology" style="margin: 0px">Methodology</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ═══ HERO ═══ -->
+  <div class="hero">
+    <div class="hero-left fa">
+      <div class="gender-label">
+        <div class="gender-label-inner">
+          <span>Women's</span>
+          <span>Men's</span>
+        </div>
+      </div>
+      <h1 class="hero-title">World<br>Volleyball<br><em>Team Rankings</em></h1>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Period</span>
+          <span class="meta-value">2025–2026</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Status</span>
+          <span class="meta-value demo">Demo</span>
+        </div>
+      </div>
+      <p class="demo-note">Demo version. The rankings on this site use sample data, not real match results.</p>
+    </div>
+    <div class="hero-right fb">
+      <span class="stat-pill">Club teams</span>
+      <span class="stat-pill">Prototype</span>
+    </div>
+  </div>
+
+  <!-- ═══ RANKINGS PAGE ═══ -->
+  <div id="rankings-page">
+    <div class="content-tabs">
+      <button class="ctab active" data-ctab="leagues">League Rankings</button>
+      <button class="ctab" data-ctab="teams">Teams Rankings</button>
+    </div>
+
+    <!-- LEAGUES – no conf filter -->
+    <div class="ranking-section visible" id="tab-leagues">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
+            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"></circle>
+            <path d="M11.5 11.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+          </svg>
+          <input class="search-input" id="leagueSearch" type="text" placeholder="Search league…">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="leagueTable">
+          <thead>
+            <tr>
+              <th class="center" data-col="rank">#<span class="sa">↕</span></th>
+              <th data-col="name">League<span class="sa">↕</span></th>
+              <th class="center" data-col="tier">Tier<span class="sa">↕</span></th>
+              <th class="center" data-col="change">Chg<span class="sa">↕</span></th>
+              <th class="right" data-col="rating">Rating<span class="sa">↕</span></th>
+              <th class="right" data-col="clubs">Clubs<span class="sa">↕</span></th>
+              <th class="right" data-col="matches">Matches<span class="sa">↕</span></th>
+              <th class="center">Trend</th>
+            </tr>
+          </thead>
+          <tbody id="leagueBody"></tbody>
+        </table>
+        <div class="no-results" id="leagueNoRes" style="display:none">No leagues found</div>
+      </div>
+    </div>
+
+    <!-- TEAMS – with conf filter -->
+    <div class="ranking-section" id="tab-teams">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" viewBox="0 0 16 16">
+            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"></circle>
+            <path d="M11.5 11.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path>
+          </svg>
+          <input class="search-input" id="teamSearch" type="text" placeholder="Search team…">
+        </div>
+        <div class="filter-tabs" id="teamConfFilter">
+          <button class="ftab active" data-conf="ALL">All</button>
+          <button class="ftab" data-conf="AMERICA">Americas</button>
+          <button class="ftab" data-conf="EUROPE">Europe</button>
+          <button class="ftab" data-conf="ASIA">Asia</button>
+          <button class="ftab" data-conf="AFRICA">Africa</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="teamTable">
+          <thead>
+            <tr>
+              <th class="center" data-col="rank">#<span class="sa">↕</span></th>
+              <th data-col="name">Team<span class="sa">↕</span></th>
+              <th class="center" data-col="change">Chg<span class="sa">↕</span></th>
+              <th class="right" data-col="rating">Rating<span class="sa">↕</span></th>
+              <th class="right" data-col="matches">Matches<span class="sa">↕</span></th>
+              <th class="center">Trend</th>
+            </tr>
+          </thead>
+          <tbody id="teamBody"></tbody>
+        </table>
+        <div class="no-results" id="teamNoRes" style="display:none">No teams found</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ METHODOLOGY ═══ -->
+  <div class="methodology-page" id="methodology-page">
+    <div class="meth-section">
+      <h2>Rating <span>Formula</span></h2>
+      <p style="font-size:.88rem;color:var(--muted);line-height:1.7;max-width:640px">Vollyx is a two-tier rating system built on Glicko-1. Tier 1 rates national leagues using international club matches only. Tier 2 rates clubs: each season starts from a league bonus plus a historical component, and every match then adjusts the rating.</p>
+      <div class="meth-formula">StartRating = 0.5 × R(t-1) + 0.25 × R(t-2) + LeagueBonus</div>
+    </div>
+    <div class="meth-section">
+      <h2>Model <span>Weights</span></h2>
+      <div class="meth-weights">
+        <div class="weight-item"><span class="wlabel">FIVB Club World Champ.</span><span class="wval">×1.0</span></div>
+        <div class="weight-item"><span class="wlabel">CEV Champions League</span><span class="wval">×1.0</span></div>
+        <div class="weight-item"><span class="wlabel">CEV Cup</span><span class="wval">×0.7</span></div>
+        <div class="weight-item"><span class="wlabel">CEV Challenge Cup</span><span class="wval">×0.4</span></div>
+        <div class="weight-item"><span class="wlabel">Current season</span><span class="wval">×1.0</span></div>
+        <div class="weight-item"><span class="wlabel">Previous season</span><span class="wval">×0.5</span></div>
+        <div class="weight-item"><span class="wlabel">Two seasons ago</span><span class="wval">×0.25</span></div>
+        <div class="weight-item"><span class="wlabel">Older seasons</span><span class="wval">×0</span></div>
+      </div>
+    </div>
+    <div class="meth-section">
+      <h2>Key <span>Principles</span></h2>
+      <div class="meth-grid">
+        <div class="meth-card"><div class="meth-card-title">Time Decay</div><p>Each season starts from the previous final rating × 0.5 plus the rating two seasons ago × 0.25. Seasons older than that are not counted.</p></div>
+        <div class="meth-card"><div class="meth-card-title">Opponent Strength</div><p>After every match, Glicko-1 compares the result with the expected one. Beating a stronger team gains more, an expected loss to a stronger team costs little.</p></div>
+        <div class="meth-card"><div class="meth-card-title">League Rating</div><p>A league's rating comes only from matches between clubs of different leagues in international tournaments. Matches between clubs of the same league cancel out.</p></div>
+        <div class="meth-card"><div class="meth-card-title">Rating Deviation</div><p>Each club has a rating deviation (RD) showing how certain its rating is. RD is high for clubs that missed recent seasons and shrinks with every match played.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <p class="footer-note fb">Two-tier Glicko-1 rating: league strength from international club competitions, club ratings updated after every match. Demo version with sample data.</p>
+    <span class="footer-brand fa">Vollyx · <span>Season 2025–2026</span></span>
+  </footer>
+
+</div>
+
+<!-- TWEAKS -->
+<div id="tweaks-panel">
+  <div class="tweaks-title">Tweaks</div>
+  <div class="tweak-row">
+    <label>Rows shown</label>
+    <input type="range" id="twkRows" min="10" max="30" step="5" value="20">
+  </div>
+  <div class="tweak-row">
+    <label>Density</label>
+    <div class="tweak-toggle">
+      <button class="tweak-btn on" data-density="normal">Normal</button>
+      <button class="tweak-btn" data-density="compact">Compact</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "rows": 20,
+  "density": "normal"
+}/*EDITMODE-END*/;
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const wLeagues = [
+  { rank:1,  flag:'🇮🇹', name:'Serie A1',           country:'Italy',       conf:'EUROPE',  tier:1, rating:412.5, change:1,  clubs:14, matches:182, trend:[7,8,8,9,9,10,10,10] },
+  { rank:2,  flag:'🇧🇷', name:'Superliga Feminina', country:'Brazil',      conf:'AMERICA', tier:1, rating:408.1, change:-1, clubs:12, matches:156, trend:[8,8,9,9,9,10,10,10] },
+  { rank:3,  flag:'🇹🇷', name:'Sultanlar Ligi',     country:'Turkey',      conf:'EUROPE',  tier:1, rating:396.7, change:0,  clubs:14, matches:196, trend:[6,7,8,8,9,9,9,10]  },
+  { rank:4,  flag:'🇷🇺', name:'Superleague',        country:'Russia',      conf:'EUROPE',  tier:1, rating:371.2, change:-2, clubs:16, matches:240, trend:[9,9,8,7,7,7,6,6]   },
+  { rank:5,  flag:'🇵🇱', name:'PlusLiga',           country:'Poland',      conf:'EUROPE',  tier:1, rating:358.4, change:3,  clubs:16, matches:208, trend:[4,5,6,7,7,8,8,9]   },
+  { rank:6,  flag:'🇰🇷', name:'V-League',           country:'South Korea', conf:'ASIA',    tier:1, rating:342.0, change:0,  clubs:7,  matches:126, trend:[5,6,6,7,7,8,8,9]   },
+  { rank:7,  flag:'🇯🇵', name:'V.League Division 1',country:'Japan',       conf:'ASIA',    tier:1, rating:335.6, change:1,  clubs:12, matches:168, trend:[5,5,6,6,7,8,8,9]   },
+  { rank:8,  flag:'🇩🇪', name:'Bundesliga',         country:'Germany',     conf:'EUROPE',  tier:1, rating:318.3, change:-1, clubs:12, matches:154, trend:[5,6,6,7,7,7,8,8]   },
+  { rank:9,  flag:'🇫🇷', name:'Ligue A',            country:'France',      conf:'EUROPE',  tier:1, rating:304.9, change:2,  clubs:12, matches:144, trend:[4,4,5,5,6,7,7,8]   },
+  { rank:10, flag:'🇺🇸', name:'PVF National League',country:'USA',         conf:'AMERICA', tier:1, rating:298.5, change:4,  clubs:8,  matches:98,  trend:[2,3,4,5,6,7,7,8]   },
+  { rank:11, flag:'🇨🇳', name:'China Volleyball SL',country:'China',       conf:'ASIA',    tier:1, rating:285.2, change:-1, clubs:16, matches:240, trend:[6,6,7,7,7,7,7,7]   },
+  { rank:12, flag:'🇷🇸', name:'Odbojkaška Liga',    country:'Serbia',      conf:'EUROPE',  tier:2, rating:268.8, change:1,  clubs:10, matches:120, trend:[3,4,5,5,6,6,7,7]   },
+  { rank:13, flag:'🇳🇱', name:'Eredivisie',         country:'Netherlands', conf:'EUROPE',  tier:2, rating:254.1, change:0,  clubs:10, matches:130, trend:[4,5,5,6,6,6,6,7]   },
+  { rank:14, flag:'🇦🇿', name:'Azərbaijan League',  country:'Azerbaijan',  conf:'EUROPE',  tier:2, rating:246.7, change:5,  clubs:8,  matches:84,  trend:[2,3,3,4,5,5,6,7]   },
+  { rank:15, flag:'🇧🇪', name:'Ligue nationale',    country:'Belgium',     conf:'EUROPE',  tier:2, rating:238.3, change:-1, clubs:10, matches:120, trend:[3,4,4,5,5,6,6,6]   },
+  { rank:16, flag:'🇬🇷', name:'A1 Ethniki',         country:'Greece',      conf:'EUROPE',  tier:2, rating:229.0, change:0,  clubs:12, matches:143, trend:[3,3,4,4,5,5,5,6]   },
+  { rank:17, flag:'🇦🇷', name:'Liga de Vóleibol',   country:'Argentina',   conf:'AMERICA', tier:2, rating:214.5, change:2,  clubs:10, matches:110, trend:[2,3,3,4,4,5,5,6]   },
+  { rank:18, flag:'🇹🇭', name:'Thailand League',    country:'Thailand',    conf:'ASIA',    tier:2, rating:205.8, change:0,  clubs:8,  matches:84,  trend:[2,2,3,3,4,4,5,5]   },
+  { rank:19, flag:'🇺🇦', name:'Ukrainian SL',       country:'Ukraine',     conf:'EUROPE',  tier:2, rating:197.3, change:-3, clubs:8,  matches:84,  trend:[5,5,4,4,3,3,3,4]   },
+  { rank:20, flag:'🇪🇸', name:'Superliga Femenina', country:'Spain',       conf:'EUROPE',  tier:2, rating:190.6, change:1,  clubs:12, matches:143, trend:[2,3,3,4,4,4,5,5]   },
+];
+const mLeagues = [
+  { rank:1,  flag:'🇮🇹', name:'SuperLega',          country:'Italy',       conf:'EUROPE',  tier:1, rating:431.2, change:0,  clubs:14, matches:196, trend:[7,8,9,9,10,10,10,10] },
+  { rank:2,  flag:'🇷🇺', name:'Super League',       country:'Russia',      conf:'EUROPE',  tier:1, rating:418.5, change:-1, clubs:16, matches:240, trend:[9,9,9,8,8,8,8,8]    },
+  { rank:3,  flag:'🇵🇱', name:'PlusLiga',           country:'Poland',      conf:'EUROPE',  tier:1, rating:405.0, change:2,  clubs:16, matches:208, trend:[5,6,7,8,8,9,9,10]   },
+  { rank:4,  flag:'🇫🇷', name:'Ligue A',            country:'France',      conf:'EUROPE',  tier:1, rating:389.3, change:1,  clubs:14, matches:182, trend:[5,6,7,7,8,8,9,9]    },
+  { rank:5,  flag:'🇧🇷', name:'Superliga Masculina',country:'Brazil',      conf:'AMERICA', tier:1, rating:376.8, change:-1, clubs:12, matches:154, trend:[7,7,8,8,8,9,9,9]    },
+  { rank:6,  flag:'🇩🇪', name:'Bundesliga',         country:'Germany',     conf:'EUROPE',  tier:1, rating:355.1, change:3,  clubs:12, matches:154, trend:[4,5,5,6,7,7,8,8]    },
+  { rank:7,  flag:'🇹🇷', name:'Efeler Ligi',        country:'Turkey',      conf:'EUROPE',  tier:1, rating:341.6, change:0,  clubs:14, matches:196, trend:[5,6,6,7,7,8,8,8]    },
+  { rank:8,  flag:'🇯🇵', name:'V.League Division 1',country:'Japan',       conf:'ASIA',    tier:1, rating:328.4, change:2,  clubs:10, matches:140, trend:[4,5,5,6,6,7,7,8]    },
+  { rank:9,  flag:'🇨🇳', name:'China Volleyball SL',country:'China',       conf:'ASIA',    tier:1, rating:314.9, change:-1, clubs:16, matches:240, trend:[6,6,7,7,7,7,7,7]    },
+  { rank:10, flag:'🇦🇷', name:'Liga Argentina',     country:'Argentina',   conf:'AMERICA', tier:1, rating:299.2, change:4,  clubs:12, matches:132, trend:[2,3,4,5,5,6,7,8]    },
+  { rank:11, flag:'🇷🇸', name:'Odbojkaška Liga',    country:'Serbia',      conf:'EUROPE',  tier:2, rating:278.5, change:0,  clubs:10, matches:110, trend:[3,4,5,5,6,6,7,7]    },
+  { rank:12, flag:'🇳🇱', name:'Eredivisie',         country:'Netherlands', conf:'EUROPE',  tier:2, rating:263.1, change:-2, clubs:10, matches:120, trend:[4,5,5,5,6,6,6,7]    },
+  { rank:13, flag:'🇧🇪', name:'Ligue nationale',    country:'Belgium',     conf:'EUROPE',  tier:2, rating:249.7, change:1,  clubs:10, matches:110, trend:[3,4,4,5,5,5,6,6]    },
+  { rank:14, flag:'🇬🇷', name:'A1 Ethniki',         country:'Greece',      conf:'EUROPE',  tier:2, rating:238.0, change:0,  clubs:12, matches:132, trend:[3,3,4,4,5,5,5,6]    },
+  { rank:15, flag:'🇪🇸', name:'Superliga Masculina',country:'Spain',       conf:'EUROPE',  tier:2, rating:226.4, change:2,  clubs:12, matches:132, trend:[2,3,3,4,4,5,5,6]    },
+  { rank:16, flag:'🇮🇷', name:'Iran Super League',  country:'Iran',        conf:'ASIA',    tier:2, rating:215.8, change:5,  clubs:14, matches:156, trend:[2,2,3,4,4,5,5,5]    },
+  { rank:17, flag:'🇺🇦', name:'Ukrainian SL',       country:'Ukraine',     conf:'EUROPE',  tier:2, rating:203.3, change:-2, clubs:8,  matches:84,  trend:[4,4,4,3,3,3,3,4]    },
+  { rank:18, flag:'🇺🇸', name:'Premier Volleyball L.',country:'USA',       conf:'AMERICA', tier:2, rating:232.7, change:6,  clubs:7,  matches:84,  trend:[1,2,3,4,5,5,6,7]    },
+  { rank:19, flag:'🇰🇷', name:'V-League',           country:'South Korea', conf:'ASIA',    tier:2, rating:220.5, change:0,  clubs:7,  matches:112, trend:[3,4,4,5,5,5,5,6]    },
+  { rank:20, flag:'🇰🇿', name:'Kazakhstan NSL',     country:'Kazakhstan',  conf:'ASIA',    tier:3, rating:172.1, change:1,  clubs:8,  matches:70,  trend:[1,2,2,3,3,4,4,5]    },
+];
+const wTeams = [
+  { rank:1,  flag:'🇮🇹', name:'Prosecco DOC Imoco',        league:'Serie A1',          conf:'EUROPE',  rating:398.5, change:2,  matches:62, trend:[6,7,8,9,9,10,10,10] },
+  { rank:2,  flag:'🇹🇷', name:'Vakıfbank SK',               league:'Sultanlar Ligi',    conf:'EUROPE',  rating:391.2, change:-1, matches:58, trend:[7,8,8,9,9,9,10,10]  },
+  { rank:3,  flag:'🇧🇷', name:'Itambé Minas',              league:'Superliga',         conf:'AMERICA', rating:382.7, change:0,  matches:55, trend:[6,7,7,8,9,9,9,10]   },
+  { rank:4,  flag:'🇹🇷', name:'Eczacıbaşı Dynavit',        league:'Sultanlar Ligi',    conf:'EUROPE',  rating:371.4, change:1,  matches:60, trend:[5,6,7,8,8,9,9,9]    },
+  { rank:5,  flag:'🇮🇹', name:'Igor Gorgonzola Novara',    league:'Serie A1',          conf:'EUROPE',  rating:362.1, change:-2, matches:57, trend:[6,7,7,8,8,8,9,9]    },
+  { rank:6,  flag:'🇧🇷', name:'Sesc Flamengo',             league:'Superliga',         conf:'AMERICA', rating:355.8, change:3,  matches:53, trend:[4,5,6,7,7,8,8,9]    },
+  { rank:7,  flag:'🇵🇱', name:'Developres Rzeszów',        league:'PlusLiga',          conf:'EUROPE',  rating:344.0, change:1,  matches:61, trend:[3,4,5,6,7,8,8,9]    },
+  { rank:8,  flag:'🇷🇺', name:'Dinamo Moscow',             league:'Superleague',       conf:'EUROPE',  rating:336.5, change:-2, matches:48, trend:[8,8,7,7,6,6,6,6]    },
+  { rank:9,  flag:'🇹🇷', name:'Fenerbahçe Opet',           league:'Sultanlar Ligi',    conf:'EUROPE',  rating:328.3, change:0,  matches:59, trend:[5,6,6,7,7,8,8,8]    },
+  { rank:10, flag:'🇮🇹', name:'Savino del Bene Scandicci', league:'Serie A1',          conf:'EUROPE',  rating:319.7, change:2,  matches:56, trend:[4,5,6,6,7,7,8,8]    },
+  { rank:11, flag:'🇧🇷', name:'Osasco Audax',              league:'Superliga',         conf:'AMERICA', rating:308.2, change:-1, matches:50, trend:[5,5,6,6,7,7,7,8]    },
+  { rank:12, flag:'🇯🇵', name:'Hisamitsu Springs',         league:'V.League Div 1',    conf:'ASIA',    rating:299.4, change:4,  matches:66, trend:[3,4,4,5,6,6,7,7]    },
+  { rank:13, flag:'🇵🇱', name:'ŁKS Łódź',                  league:'PlusLiga',          conf:'EUROPE',  rating:289.1, change:0,  matches:58, trend:[3,4,5,5,6,6,6,7]    },
+  { rank:14, flag:'🇰🇷', name:'Heungkuk Life Pink Spiders',league:'V-League',          conf:'ASIA',    rating:279.8, change:1,  matches:54, trend:[3,4,4,5,5,6,6,7]    },
+  { rank:15, flag:'🇩🇪', name:'VfB Suhl Lotto Thüringen',  league:'Bundesliga',        conf:'EUROPE',  rating:268.5, change:-1, matches:52, trend:[4,4,5,5,5,6,6,7]    },
+  { rank:16, flag:'🇷🇺', name:'Uralochka-NTMK',            league:'Superleague',       conf:'EUROPE',  rating:259.3, change:-3, matches:44, trend:[7,7,6,5,4,4,4,5]    },
+  { rank:17, flag:'🇫🇷', name:'RC Cannes',                 league:'Ligue A',           conf:'EUROPE',  rating:249.6, change:5,  matches:49, trend:[2,3,3,4,5,5,6,6]    },
+  { rank:18, flag:'🇺🇸', name:'San Diego Mojo',            league:'PVF Nat. League',   conf:'AMERICA', rating:240.1, change:2,  matches:42, trend:[1,2,3,4,4,5,5,6]    },
+  { rank:19, flag:'🇧🇷', name:'Dentil Praia Clube',        league:'Superliga',         conf:'AMERICA', rating:231.8, change:0,  matches:51, trend:[3,4,4,5,5,5,5,6]    },
+  { rank:20, flag:'🇯🇵', name:'JT Marvelous',              league:'V.League Div 1',    conf:'ASIA',    rating:222.4, change:1,  matches:62, trend:[2,3,3,4,4,5,5,6]    },
+];
+const mTeams = [
+  { rank:1,  flag:'🇮🇹', name:'Sir Safety Perugia',       league:'SuperLega',        conf:'EUROPE',  rating:421.3, change:0,  matches:64, trend:[7,8,9,9,10,10,10,10] },
+  { rank:2,  flag:'🇮🇹', name:'Itas Trentino',            league:'SuperLega',        conf:'EUROPE',  rating:415.8, change:1,  matches:62, trend:[6,7,8,9,9,10,10,10]  },
+  { rank:3,  flag:'🇷🇺', name:'Zenit Kazan',              league:'Super League',     conf:'EUROPE',  rating:408.2, change:-1, matches:55, trend:[9,9,8,8,8,8,8,8]     },
+  { rank:4,  flag:'🇵🇱', name:'Jastrzębski Węgiel',       league:'PlusLiga',         conf:'EUROPE',  rating:396.5, change:2,  matches:60, trend:[5,6,7,8,8,9,9,10]    },
+  { rank:5,  flag:'🇫🇷', name:'Paris Volley',             league:'Ligue A',          conf:'EUROPE',  rating:381.0, change:-1, matches:58, trend:[4,5,6,7,8,8,9,9]     },
+  { rank:6,  flag:'🇧🇷', name:'Sada Cruzeiro',            league:'Superliga Masc.',  conf:'AMERICA', rating:368.4, change:3,  matches:52, trend:[5,6,7,7,8,8,9,9]     },
+  { rank:7,  flag:'🇩🇪', name:'VfB Friedrichshafen',      league:'Bundesliga',       conf:'EUROPE',  rating:352.9, change:0,  matches:54, trend:[5,6,6,7,7,7,8,8]     },
+  { rank:8,  flag:'🇹🇷', name:'Halkbank Ankara',          league:'Efeler Ligi',      conf:'EUROPE',  rating:341.7, change:1,  matches:60, trend:[4,5,6,6,7,7,8,8]     },
+  { rank:9,  flag:'🇧🇷', name:'EMS Taubaté',              league:'Superliga Masc.',  conf:'AMERICA', rating:328.5, change:-2, matches:50, trend:[6,6,7,7,7,7,8,8]     },
+  { rank:10, flag:'🇯🇵', name:'Panasonic Panthers',       league:'V.League Div 1',   conf:'ASIA',    rating:314.2, change:4,  matches:60, trend:[3,4,4,5,6,6,7,7]     },
+  { rank:11, flag:'🇨🇳', name:'Shanghai Golden Age',      league:'China SL',         conf:'ASIA',    rating:299.8, change:0,  matches:48, trend:[4,5,5,6,6,7,7,7]     },
+  { rank:12, flag:'🇵🇱', name:'Zaksa Kędzierzyn-Koźle',   league:'PlusLiga',         conf:'EUROPE',  rating:288.1, change:2,  matches:58, trend:[4,5,5,6,6,6,7,7]     },
+  { rank:13, flag:'🇮🇹', name:'Cucine Lube Civitanova',   league:'SuperLega',        conf:'EUROPE',  rating:278.4, change:-1, matches:60, trend:[5,6,6,6,7,7,7,7]     },
+  { rank:14, flag:'🇫🇷', name:'Chaumont VB 52',           league:'Ligue A',          conf:'EUROPE',  rating:265.7, change:1,  matches:52, trend:[2,3,4,5,5,6,6,7]     },
+  { rank:15, flag:'🇺🇸', name:'Phelps Volleyball',        league:'PVL',              conf:'AMERICA', rating:254.3, change:5,  matches:40, trend:[1,2,3,4,5,5,6,6]     },
+  { rank:16, flag:'🇷🇺', name:'Dinamo Moscow',            league:'Super League',     conf:'EUROPE',  rating:244.8, change:-2, matches:50, trend:[6,6,5,5,4,4,5,5]     },
+  { rank:17, flag:'🇯🇵', name:'JT Thunders Hiroshima',    league:'V.League Div 1',   conf:'ASIA',    rating:234.1, change:0,  matches:60, trend:[3,4,4,4,5,5,5,6]     },
+  { rank:18, flag:'🇦🇷', name:'UPCN San Juan',            league:'Liga Argentina',   conf:'AMERICA', rating:224.6, change:3,  matches:48, trend:[2,3,3,4,4,5,5,6]     },
+  { rank:19, flag:'🇹🇷', name:'Fenerbahçe HDI',           league:'Efeler Ligi',      conf:'EUROPE',  rating:216.2, change:-1, matches:58, trend:[3,4,4,5,5,5,5,6]     },
+  { rank:20, flag:'🇰🇷', name:'KB Insurance Stars',       league:'V-League',         conf:'ASIA',    rating:207.5, change:2,  matches:52, trend:[2,3,3,4,4,5,5,5]     },
+];
+
+// ── STATE ──────────────────────────────────────────────────────────────────────
+let gender = 'women';
+const leagueState = { sortCol:'rank', sortDir:1, search:'', rows: TWEAK_DEFAULTS.rows };
+const teamState   = { sortCol:'rank', sortDir:1, search:'', conf:'ALL', rows: TWEAK_DEFAULTS.rows };
+
+function getLeagues() { return gender === 'women' ? wLeagues : mLeagues; }
+function getTeams()   { return gender === 'women' ? wTeams   : mTeams; }
+function maxOf(arr,k) { return Math.max(...arr.map(x=>x[k])); }
+
+// ── RENDER HELPERS ─────────────────────────────────────────────────────────────
+function renderChange(c) {
+  if(c===0) return `<span class="change same">— 0</span>`;
+  if(c>0)   return `<span class="change up">▲ ${c}</span>`;
+  return          `<span class="change down">▼ ${Math.abs(c)}</span>`;
+}
+function renderMedal(rank) {
+  if(rank===1) return `<span class="rank-medal medal-1">1</span>`;
+  if(rank===2) return `<span class="rank-medal medal-2">2</span>`;
+  if(rank===3) return `<span class="rank-medal medal-3">3</span>`;
+  return `<span class="rank-num">${rank}</span>`;
+}
+function renderSpark(trend) {
+  const m = Math.max(...trend);
+  return `<div class="spark">${trend.map(v=>`<div class="spark-bar" style="height:${Math.round(v/m*100)}%"></div>`).join('')}</div>`;
+}
+function renderBar(val,mx) {
+  return `<div class="matches-bar"><div class="matches-bar-fill" style="width:${Math.round(val/mx*100)}%"></div></div>`;
+}
+function tierBadge(t){ return `<span class="tier-badge tier-${t}">Tier ${t}</span>`; }
+function sortData(data,col,dir){
+  return [...data].sort((a,b)=>{
+    let av=a[col],bv=b[col];
+    if(typeof av==='string'){av=av.toLowerCase();bv=bv.toLowerCase();}
+    return (av<bv?-1:av>bv?1:0)*dir;
+  });
+}
+
+function renderLeagues(){
+  let data = getLeagues();
+  if(leagueState.search){ const q=leagueState.search.toLowerCase(); data=data.filter(l=>l.name.toLowerCase().includes(q)||l.country.toLowerCase().includes(q)); }
+  data = sortData(data,leagueState.sortCol,leagueState.sortDir).slice(0,leagueState.rows);
+  const body=document.getElementById('leagueBody'), noRes=document.getElementById('leagueNoRes');
+  if(!data.length){body.innerHTML='';noRes.style.display='block';return;}
+  noRes.style.display='none';
+  const mx=maxOf(getLeagues(),'matches');
+  body.innerHTML=data.map((l,i)=>`
+    <tr class="${l.rank<=3?'top3':''}" style="animation-delay:${i*0.022}s">
+      <td class="center">${renderMedal(l.rank)}</td>
+      <td><div class="entity-cell"><span class="flag">${l.flag}</span>
+        <div><div class="entity-name">${l.name}</div><div class="entity-sub">${l.country}</div></div>
+      </div></td>
+      <td class="center">${tierBadge(l.tier)}</td>
+      <td class="center">${renderChange(l.change)}</td>
+      <td class="right"><span class="rating-val">${l.rating.toFixed(1)}</span></td>
+      <td class="right"><span style="color:var(--muted);font-size:.82rem">${l.clubs}</span></td>
+      <td class="right"><div class="matches-bar-wrap"><span style="color:var(--muted);font-size:.82rem">${l.matches}</span>${renderBar(l.matches,mx)}</div></td>
+      <td class="center">${renderSpark(l.trend)}</td>
+    </tr>`).join('');
+  document.querySelectorAll('#leagueTable thead th').forEach(th=>th.classList.toggle('sorted',th.dataset.col===leagueState.sortCol));
+}
+
+function renderTeams(){
+  let data = getTeams();
+  if(teamState.search){ const q=teamState.search.toLowerCase(); data=data.filter(t=>t.name.toLowerCase().includes(q)||t.league.toLowerCase().includes(q)); }
+  if(teamState.conf!=='ALL') data=data.filter(t=>t.conf===teamState.conf);
+  data = sortData(data,teamState.sortCol,teamState.sortDir).slice(0,teamState.rows);
+  const body=document.getElementById('teamBody'), noRes=document.getElementById('teamNoRes');
+  if(!data.length){body.innerHTML='';noRes.style.display='block';return;}
+  noRes.style.display='none';
+  const mx=maxOf(getTeams(),'matches');
+  body.innerHTML=data.map((t,i)=>`
+    <tr class="${t.rank<=3?'top3':''}" style="animation-delay:${i*0.022}s">
+      <td class="center">${renderMedal(t.rank)}</td>
+      <td><div class="entity-cell"><span class="flag">${t.flag}</span>
+        <div><div class="entity-name">${t.name}</div><div class="entity-sub">${t.league}</div></div>
+      </div></td>
+      <td class="center">${renderChange(t.change)}</td>
+      <td class="right"><span class="rating-val">${t.rating.toFixed(1)}</span></td>
+      <td class="right"><div class="matches-bar-wrap"><span style="color:var(--muted);font-size:.82rem">${t.matches}</span>${renderBar(t.matches,mx)}</div></td>
+      <td class="center">${renderSpark(t.trend)}</td>
+    </tr>`).join('');
+  document.querySelectorAll('#teamTable thead th').forEach(th=>th.classList.toggle('sorted',th.dataset.col===teamState.sortCol));
+}
+function renderAll(){ renderLeagues(); renderTeams(); }
+
+// ── GENDER SWITCH – barrel roll flip ──────────────────────────────────────────
+const FLIP_MS = 340;
+
+function applyAnim(selector, name) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.style.animation = 'none';
+    el.offsetWidth; // reflow
+    el.style.animation = `${name} ${FLIP_MS}ms cubic-bezier(0.45,0,0.55,1) forwards`;
+  });
+}
+function clearAnim() {
+  document.querySelectorAll('.fa,.fb').forEach(el => el.style.animation = '');
+}
+
+function applyHeaderLayout(toMen) {
+  const h = document.querySelector('.site-header');
+  h.style.gridTemplateAreas = toMen ? '"nav toggle logo"' : '"logo toggle nav"';
+  h.style.alignItems = 'stretch';
+  document.querySelector('.header-logo').style.justifyContent = toMen ? 'flex-end' : 'flex-start';
+  document.querySelector('.header-nav').style.justifyContent  = toMen ? 'flex-start' : 'flex-end';
+}
+
+function switchGender(newGender) {
+  if (gender === newGender) return;
+  const toMen = newGender === 'men';
+
+  // Exit: fa=logo/title go right when →men, fb=nav/stats go left when →men
+  applyAnim('.fa', toMen ? 'flipExitRight' : 'flipExitLeft');
+  applyAnim('.fb', toMen ? 'flipExitLeft'  : 'flipExitRight');
+
+  setTimeout(() => {
+    gender = newGender;
+    document.body.classList.toggle('men', toMen);
+    applyHeaderLayout(toMen);
+    document.getElementById('gtW').classList.toggle('active', !toMen);
+    document.getElementById('gtM').classList.toggle('active', toMen);
+    leagueState.search = teamState.search = '';
+    document.getElementById('leagueSearch').value = '';
+    document.getElementById('teamSearch').value = '';
+    teamState.conf = 'ALL';
+    document.querySelectorAll('#teamConfFilter .ftab').forEach(f=>f.classList.toggle('active',f.dataset.conf==='ALL'));
+    renderAll();
+
+    // Enter from opposite side after position has changed
+    applyAnim('.fa', toMen ? 'flipEnterFromLeft'  : 'flipEnterFromRight');
+    applyAnim('.fb', toMen ? 'flipEnterFromRight' : 'flipEnterFromLeft');
+
+    setTimeout(clearAnim, FLIP_MS + 50);
+  }, FLIP_MS);
+}
+
+document.getElementById('genderToggle').addEventListener('click', () => {
+  switchGender(gender === 'women' ? 'men' : 'women');
+});
+
+// ── NAV ────────────────────────────────────────────────────────────────────────
+document.querySelectorAll('[data-nav]').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelectorAll('[data-nav]').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+    const t = a.dataset.nav;
+    document.getElementById('rankings-page').style.display = t==='rankings' ? '' : 'none';
+    document.getElementById('methodology-page').classList.toggle('visible', t==='methodology');
+  });
+});
+
+// ── CONTENT TABS ───────────────────────────────────────────────────────────────
+document.querySelectorAll('.ctab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.ctab;
+    document.getElementById('tab-leagues').classList.toggle('visible', tab==='leagues');
+    document.getElementById('tab-teams').classList.toggle('visible', tab==='teams');
+  });
+});
+
+// ── SORT / SEARCH ──────────────────────────────────────────────────────────────
+document.querySelectorAll('#leagueTable thead th[data-col]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col=th.dataset.col;
+    leagueState.sortDir=leagueState.sortCol===col?leagueState.sortDir*-1:(col==='rank'?1:-1);
+    leagueState.sortCol=col; renderLeagues();
+  });
+});
+document.getElementById('leagueSearch').addEventListener('input',e=>{leagueState.search=e.target.value;renderLeagues();});
+
+document.querySelectorAll('#teamTable thead th[data-col]').forEach(th=>{
+  th.addEventListener('click',()=>{
+    const col=th.dataset.col;
+    teamState.sortDir=teamState.sortCol===col?teamState.sortDir*-1:(col==='rank'?1:-1);
+    teamState.sortCol=col; renderTeams();
+  });
+});
+document.getElementById('teamSearch').addEventListener('input',e=>{teamState.search=e.target.value;renderTeams();});
+document.querySelectorAll('#teamConfFilter .ftab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#teamConfFilter .ftab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); teamState.conf=btn.dataset.conf; renderTeams();
+  });
+});
+
+// ── TWEAKS ─────────────────────────────────────────────────────────────────────
+window.addEventListener('message',e=>{
+  if(e.data?.type==='__activate_edit_mode') document.getElementById('tweaks-panel').classList.add('open');
+  else if(e.data?.type==='__deactivate_edit_mode') document.getElementById('tweaks-panel').classList.remove('open');
+});
+window.parent.postMessage({type:'__edit_mode_available'},'*');
+
+document.getElementById('twkRows').addEventListener('input',e=>{
+  const v=+e.target.value; leagueState.rows=teamState.rows=v; renderAll();
+  window.parent.postMessage({type:'__edit_mode_set_keys',edits:{rows:v}},'*');
+});
+document.querySelectorAll('[data-density]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('[data-density]').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on');
+    const compact=btn.dataset.density==='compact';
+    document.querySelectorAll('td,thead th').forEach(el=>el.style.padding=compact?'0.45rem 0.9rem':'');
+    window.parent.postMessage({type:'__edit_mode_set_keys',edits:{density:btn.dataset.density}},'*');
+  });
+});
+
+// ── INIT ───────────────────────────────────────────────────────────────────────
+applyHeaderLayout(false);
+renderAll();
+</script>
+
+
+</body></html>
